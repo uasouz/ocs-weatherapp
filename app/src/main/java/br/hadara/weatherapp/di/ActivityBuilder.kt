@@ -1,7 +1,7 @@
 package br.hadara.weatherapp.di
 
-import br.hadara.weatherapp.ui.MainActivity
-import br.hadara.weatherapp.ui.SplashActivity
+import br.hadara.weatherapp.ui.main.MainActivity
+import br.hadara.weatherapp.ui.splash.SplashActivity
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 
