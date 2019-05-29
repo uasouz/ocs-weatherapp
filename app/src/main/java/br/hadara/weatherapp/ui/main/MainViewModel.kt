@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class MainViewModel @Inject constructor(val repository: MainRepository) : ViewModel() {
 
-    val currentCityWeather: MutableLiveData<WeatherResponse> = repository.currentPlaceWeather
+    val currentCityWeather: MutableLiveData<Outcome<WeatherResponse>> = repository.currentPlaceWeather
 
 
     fun getWeatherByPosition(lat: Double, lon: Double) {
@@ -19,6 +19,10 @@ class MainViewModel @Inject constructor(val repository: MainRepository) : ViewMo
 
     fun getWeatherById(id: Int) {
         repository.getWeatherById(id)
+    }
+
+    fun getWeatherByCityName(name: String){
+        repository.getWeatherByCityName(name)
     }
 
 }

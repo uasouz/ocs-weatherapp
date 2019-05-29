@@ -21,7 +21,7 @@ class MainRepository @Inject constructor(val apiService: WeatherService) : MainR
     val scope = CoroutineScope(coroutinesContext)
 
     val currentPlaceWeather:
-            MutableLiveData<WeatherResponse> = MutableLiveData()
+            MutableLiveData<Outcome<WeatherResponse>> = MutableLiveData()
 
     override suspend fun <T : Any> safeApiCall(call: suspend () -> Response<T>, errorMessage: String): Result<T> {
         try {
@@ -50,7 +50,13 @@ class MainRepository @Inject constructor(val apiService: WeatherService) : MainR
             when (request) {
                 is Result.Success -> {
                     if (request.data.cod == 200) {
-                        currentPlaceWeather.postValue(request.data)
+                        try {
+                            withContext(Dispatchers.Main) {
+                                currentPlaceWeather.success(request.data)
+                            }
+                        } catch (e: Throwable) {
+                            Log.e("weather", "byPOS", e)
+                        }
                     } else {
 
                     }
@@ -72,7 +78,41 @@ class MainRepository @Inject constructor(val apiService: WeatherService) : MainR
             when (request) {
                 is Result.Success -> {
                     if (request.data.cod == 200) {
-                        currentPlaceWeather.postValue(request.data)
+                        try {
+                        withContext(Dispatchers.Main) {
+                            currentPlaceWeather.success(request.data)
+                        }
+                        } catch (e: Throwable) {
+                            Log.e("weather", "byID", e)
+                        }
+                    } else {
+
+                    }
+                }
+                is Result.Error -> {
+
+                }
+                is Result.Failure -> {
+
+                }
+            }
+        }
+    }
+
+    override fun getWeatherByCityName(name: String) {
+        scope.launch {
+            val request =
+                safeApiCall({ apiService.WeatherByName(name).await() }, "Unable to load weather statistics")
+            when (request) {
+                is Result.Success -> {
+                    if (request.data.cod == 200) {
+                        try {
+                            withContext(Dispatchers.Main) {
+                                currentPlaceWeather.success(request.data)
+                            }
+                        } catch (e: Throwable) {
+                            Log.e("weather", "byName", e)
+                        }
                     } else {
 
                     }

@@ -21,4 +21,12 @@ interface WeatherService {
         @Query("id") id: Int,
         @Query("appid") Key: String = apiKey
     ): Deferred<Response<WeatherResponse>>
+
+
+    @GET("weather")//Query id
+    fun WeatherByName(
+        @Query("q") name: String,
+        @Query("appid") Key: String = apiKey
+    ): Deferred<Response<WeatherResponse>>
+
 }

@@ -14,13 +14,16 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import br.hadara.weatherapp.R
+import br.hadara.weatherapp.data.Constants.IMG_URL
 import br.hadara.weatherapp.util.Outcome
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
+import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection.inject
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,43 +41,33 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         inject(this)
         initializeWeatherDataObserver()
-//        loadWeatherById(3663517)
         getLocation()
     }
 
     private fun initializeWeatherDataObserver() {
         viewModel.currentCityWeather.observe(this, Observer { weatherOucome ->
-                    tvCityName.text = weatherOucome.name
-                    tvTemperature.text = weatherOucome.weather.first().description
+            when(weatherOucome){
+                is Outcome.Success-> {
+                    Log.d("Success","test")
+                        tvCityName.text = weatherOucome.data.name
+                        tvTemperature.text = weatherOucome.data.main.temp.roundToInt().toString()
+                        tvDescription.text = weatherOucome.data.weather.first().description
+                        Picasso.get().load(IMG_URL + weatherOucome.data.weather.first().icon + ".png")
+                            .into(ivWeatherIcon)
+                }
+                is Outcome.Failure->{
+
+                }
+                is Outcome.Error->{
+
+                }
+            }
         })
     }
 
     fun loadWeatherById(id: Int) {
         viewModel.getWeatherById(id)
     }
-
-//    fun setupLocationService() {
-//
-//        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-//
-//        val locationListener = object : LocationListener {
-//
-//            override fun onLocationChanged(location: Location) {
-//
-//            }
-//
-//            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
-//            }
-//
-//            override fun onProviderEnabled(provider: String) {
-//            }
-//
-//            override fun onProviderDisabled(provider: String) {
-//            }
-//        }
-//
-//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
-//    }
 
     private fun requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(
@@ -91,12 +84,12 @@ class MainActivity : AppCompatActivity() {
 //                Log.d("Permission","Rationale Request")
 //
 //            } else {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    ACCESS_FINE_LOCATION_REQUEST_ID
-                )
-            }
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                ACCESS_FINE_LOCATION_REQUEST_ID
+            )
+        }
 //        }
     }
 
@@ -106,14 +99,14 @@ class MainActivity : AppCompatActivity() {
     fun getLocation() {
 
 
-        fusedLocationClient =  LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val lastLocationTask = fusedLocationClient?.lastLocation
 
         lastLocationTask?.addOnSuccessListener { location: Location? ->
             if (location != null) {
                 loadWeatherByPosition(location)
             } else {
-                Log.d("Null Location","")
+                Log.d("Null Location", "")
             }
         }
         lastLocationTask?.addOnFailureListener {
@@ -150,7 +143,7 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                Log.d("Permission","Rquesting")
+                Log.d("Permission", "Rquesting")
                 requestLocationPermission()
             } else {
                 fusedLocationClient?.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
@@ -190,6 +183,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loadWeatherByPosition(location: Location) {
+        Log.d("Loading","Position")
         viewModel.getWeatherByPosition(location.latitude, location.longitude)
     }
 
@@ -202,5 +196,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun configureSearchView() {
+
+    }
 
 }

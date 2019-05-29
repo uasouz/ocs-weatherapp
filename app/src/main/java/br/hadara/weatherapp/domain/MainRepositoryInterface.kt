@@ -10,4 +10,6 @@ interface MainRepositoryInterface {
     fun getWeatherByPosition(lat: Double, lon: Double)
 
     fun getWeatherById(id: Int)
+
+    fun getWeatherByCityName(name: String)
 }
